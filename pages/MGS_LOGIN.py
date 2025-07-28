@@ -13,7 +13,7 @@ class Login:
         self.page.goto(self.url)
 
     def login(self):
-        self.page.fill('#txtUserId', self.username)
-        self.page.fill('#txtPassword', self.password)
+        self.enter_username = self.page.fill('#txtUserId', self.username)
+        self.enter_password = self.page.fill('#txtPassword', self.password)
         self.page.click('#btnLogin')
         self.page.wait_for_navigation()
