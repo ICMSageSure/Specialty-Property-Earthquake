@@ -66,7 +66,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_text("Applicant", exact=True).click()
     payment_type = page.get_by_text("Full Pay$")
     payment_type.click()
-    print(f"Selected Payment Type: {payment_type.inner_text()}")
+    print(f"\nSelected Payment Type: {payment_type.inner_text()}")
     auto_pay_onoff = page.get_by_text("Auto Pay On")
     auto_pay_onoff.click()
     print(f"Selected Auto Pay: {auto_pay_onoff.inner_text()}")
