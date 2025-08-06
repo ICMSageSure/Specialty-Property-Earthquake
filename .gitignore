@@ -1,1 +1,7 @@
 .env
+test-results
+.pytest-cache
+.vscode
+pytestdebug.log
+screenshot_quote.png
+screenshot_quote_2.png

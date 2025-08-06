@@ -1,4 +1,4 @@
-# this test case will generate a quote for QuakePlusFlex 5% deductible with Full Pay and Auto Pay On
+# this test case will generate a quote for QuakePlusFlex 10% deductible with Full Pay and Auto Pay On
 
 import re
 from playwright.sync_api import Page, expect
@@ -28,6 +28,13 @@ address_list = [
     "2102 Harborview Ct, Santa Cruz, CA 95062"
 ]
 
+test_credit_card_numbers = ["4111111111111111",
+                            "5431111111111111",
+                            "341111111111111",
+
+
+]
+
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args, playwright):
     return {"viewport": {"width":1920,"height":1080}}
@@ -40,13 +47,14 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_role("paragraph").filter(has_text="Start New Quote").get_by_role("link").click()
     page.locator("[id=\"optionResidential\\ Earthquake\"]").get_by_text("Residential Earthquake Products").click()
     page.get_by_role("button", name="OK").click()
-    page.get_by_role("combobox", name="See the best options for").click()
-    page.get_by_role("combobox", name="See the best options for").fill(random.choice(address_list))
+    page.locator("#PropertyAddressSingleLine").wait_for(state="visible")
+    page.locator("#PropertyAddressSingleLine").click()
+    page.locator("#PropertyAddressSingleLine").fill(random.choice(address_list))
     page.wait_for_timeout(1000)
     page.get_by_role("combobox", name="See the best options for").press("Enter")
     page.get_by_role("button", name="Start Quote").click()
     page.get_by_role("textbox", name="Current Companion Insurance Policy Coverage A Dwelling Limit").click()
-    page.get_by_role("textbox", name="Current Companion Insurance Policy Coverage A Dwelling Limit").fill("3600000")
+    page.get_by_role("textbox", name="Current Companion Insurance Policy Coverage A Dwelling Limit").fill("3,600,000")
     page.get_by_role("textbox", name="Primary Applicant First Name").click()
     page.get_by_role("textbox", name="Primary Applicant First Name").press("CapsLock")
     page.get_by_role("textbox", name="Primary Applicant First Name").fill("ICMTEST")
@@ -59,15 +67,16 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_role("button", name="View Quote Options").click()
     page.get_by_role("button", name="Agree & Continue").click()
     page.locator("#lnkExpandAll").click()
+    page.get_by_role("button", name="Continue Shopping Cart", exact=True).wait_for(state="visible")
     page.get_by_text("10%", exact=True).click()
     page.get_by_role("button", name="Continue Shopping Cart", exact=True).click()
     page.get_by_role("button", name="Continue").click()
     page.get_by_role("button", name="Pay Now").click()
-    page.get_by_text("Applicant", exact=True).click()
+    page.get_by_text("Alternate Payor", exact=True).click()
     payment_type = page.get_by_text("Full Pay$")
     payment_type.click()
     print(f"\nSelected Payment Type: {payment_type.inner_text()}")
-    auto_pay_onoff = page.get_by_text("Auto Pay On")
+    auto_pay_onoff = page.get_by_text("Auto Pay Off")
     auto_pay_onoff.click()
     print(f"Selected Auto Pay: {auto_pay_onoff.inner_text()}")
     page.set_input_files("#fileD1",
@@ -93,10 +102,28 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     screenshot_path = "screenshot_quote.png"
     page.screenshot(path=screenshot_path, full_page=True)
     page.get_by_role("button", name="Continue").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("link", name="Add new payment method").wait_for(state="visible")
     page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("link", name="Add new payment method").click()
-    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Expiration Date").fill("11/26")
-    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter card number").fill("4111 1111 1111 1111")
-    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter name as it").fill("ICMTEST TESTER")
-    page.get_by_role("dialog", name="Payment method").content_frame.get_by_placeholder("Please, enter billing address").fill("1455 OLIVER RD")
-    page.get_by_role("dialog", name="Payment method").content_frame.get_by_placeholder("Billing Zip").fill("94534")
-    page.wait_for_timeout(5000)
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter card number").wait_for(state="visible")
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter card number").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter card number").press_sequentially(random.choice(test_credit_card_numbers), delay=100)
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Expiration Date").press("Tab")  
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Expiration Date").click()  
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Expiration Date").press_sequentially("11/26")
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter name as it").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter name as it").press("Tab")
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter name as it").press_sequentially("ICMTEST TESTER")
+    page.get_by_role("dialog", name="Payment method").content_frame.locator("#billingAddress").press("Tab")
+    page.get_by_role("dialog", name="Payment method").content_frame.locator("#billingAddress").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.locator("#billingAddress").press_sequentially("1455 OLIVER RD")
+    page.get_by_role("dialog", name="Payment method").content_frame.locator("#billingZip").press("Tab")
+    page.get_by_role("dialog", name="Payment method").content_frame.locator("#billingZip").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.locator("#billingZip").press_sequentially("94534")
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("button", name="Save").wait_for(state="visible")
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("button", name="Submit").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("button", name="Next").wait_for(state="visible")    
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("button", name="Next").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("button", name="Enroll").wait_for(state="visible")
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("button", name="Enroll").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("button", name="Close").wait_for(state="visible")
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("button", name="Close").click()
