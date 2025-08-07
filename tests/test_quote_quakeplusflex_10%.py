@@ -72,7 +72,17 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_role("button", name="Continue Shopping Cart", exact=True).click()
     page.get_by_role("button", name="Continue").click()
     page.get_by_role("button", name="Pay Now").click()
+
+    #  'Applicant', 'Alternate Payor', 'Mortgagee' are the valid options here
     page.get_by_text("Alternate Payor", exact=True).click()
+    # if alt payor is not needed, comment the next 6 lines
+    page.locator("#AlternatePayor_Addressee1").fill("ICMTEST ALTPAYOR")
+    page.locator("#AlternatePayor_Street").fill("1455 ALTERNATE RD")
+    page.locator("#AlternatePayor_City").fill("FAIRFIELD")
+    page.locator("#AlternatePayor_State").select_option("CA")
+    page.locator("#AlternatePayor_ZipCode").fill("94534")
+    page.locator("#AlternatePayorLoanNumber").fill("11223344")
+
     payment_type = page.get_by_text("Full Pay$")
     payment_type.click()
     print(f"\nSelected Payment Type: {payment_type.inner_text()}")
