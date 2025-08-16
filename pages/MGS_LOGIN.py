@@ -17,3 +17,23 @@ class Login:
         self.enter_password = self.page.fill('#txtPassword', self.password)
         self.page.click('#btnLogin')
         self.page.wait_for_navigation()
+
+    def create_an_account(self):
+        self.page.click('#btnCreateAccount')
+        self.page.wait_for_navigation()
+
+    def guest_login(self):
+        self.page.click('#btnGuest')
+        self.page.wait_for_navigation()
+
+    def coastal_select_insurance_link(self):
+        self.page.click('#csLink')
+
+    def geovera_insurance_link(self):
+        self.page.click('#gvLink')
+
+    def gvsic_link(self):
+        self.page.click('#gvsLink')
+    
+    def gvais_link(self):
+        self.page.click('#gvaisLink')
