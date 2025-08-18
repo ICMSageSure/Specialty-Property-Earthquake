@@ -45,18 +45,21 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_role("textbox", name="Password").fill("Password1")
     screenshot_path1 = "screenshot_login.png"
     page.screenshot(path=screenshot_path1, full_page=True)
+
     page.get_by_role("button", name="Log In", exact=True).click()
     page.get_by_role("paragraph").filter(has_text="Start New Quote").get_by_role("link").click()
     page.locator("[id=\"optionResidential\\ Earthquake\"]").get_by_text("Residential Earthquake Products").click()
     screenshot_path2 = "screenshot_newquote.png"
     page.screenshot(path=screenshot_path2, full_page=True)
     page.get_by_role("button", name="OK").click()
+
     page.locator("#PropertyAddressSingleLine").wait_for(state="visible")
     page.locator("#PropertyAddressSingleLine").click()
     page.locator("#PropertyAddressSingleLine").fill(random.choice(address_list))
     screenshot_path3 = "screenshot_address.png"
     page.screenshot(path=screenshot_path3, full_page=True)
     page.wait_for_timeout(1000)
+
     page.get_by_role("combobox", name="See the best options for").press("Enter")
     page.get_by_role("button", name="Start Quote").click()
     page.get_by_role("textbox", name="Current Companion Insurance Policy Coverage A Dwelling Limit").click()
@@ -72,6 +75,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_role("textbox", name="Applicant Email Address").fill("ICMGEOTESTER@GMAIL.COM")
     screenshot_path4 = "screenshot_applicant_info.png"
     page.screenshot(path=screenshot_path4, full_page=True)
+
     page.get_by_role("button", name="View Quote Options").click()
     page.get_by_role("button", name="Agree & Continue").click()
     page.locator("#lnkExpandAll").click()
@@ -90,16 +94,38 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_role("button", name="Pay Now").click()
 
     page.locator(".radio-toolbar")
-    #  'Applicant', 'Alternate Payor', 'Mortgagee' are the valid options here
-    applicant_choice = page.get_by_text("Alternate Payor", exact=True).click()
+# Set this variable to one of: 'Applicant', 'Alternate Payor', 'Mortgagee'
+    applicant_choice_option = "Alternate Payor"  # or "Applicant" or "Mortgagee"
 
-    page.locator("#AlternatePayor_Addressee1").fill("ICMTEST ALTPAYOR")
-    page.locator("#AlternatePayor_Street").fill("1455 ALTERNATE RD")
-    page.locator("#AlternatePayor_City").fill("FAIRFIELD")
-    page.locator("#AlternatePayor_State").select_option("CA")
-    page.locator("#AlternatePayor_ZipCode").fill("94534")
-    page.locator("#AlternatePayorLoanNumber").fill("11223344")
-
+    if applicant_choice_option == "Applicant":
+        page.get_by_text("Applicant", exact=True).click()
+        # Fill in applicant information
+        # page.locator("#Applicant_FirstName").fill("ICMTEST")
+        # page.locator("#Applicant_LastName").fill("TESTER")
+        # page.locator("#Applicant_PhoneNumber").fill("7075551234")
+        # page.locator("#ApplicantEmailAddress").fill("ICMGEOTESTER@GMAIL.COM")
+    elif applicant_choice_option == "Alternate Payor":
+        page.get_by_text("Alternate Payor", exact=True).click()
+        # Fill in the alternate payor information
+        page.locator("#AlternatePayor_Addressee1").fill("ICMTEST ALTPAYOR")
+        page.locator("#AlternatePayor_Street").fill("1455 ALTERNATE RD")
+        page.locator("#AlternatePayor_City").fill("FAIRFIELD")
+        page.locator("#AlternatePayor_State").select_option("CA")
+        page.locator("#AlternatePayor_ZipCode").fill("94534")
+        page.locator("#AlternatePayorLoanNumber").fill("11223344")
+    elif applicant_choice_option == "Mortgagee":
+        page.get_by_text("Mortgagee", exact=True).click()
+        # Fill in mortgagee information
+        page.locator('#btn-edit-mortgagee').click()
+        page.locator("#Mortgagee1_Addressee1").fill("ICMTEST MORTGAGEE")
+        page.locator("#Mortgagee1_Addressee2").fill("")
+        page.locator("#Mortgagee1LoanNumber").fill("11223344")
+        page.locator("#Mortgagee1_Street").fill("1455 MORTGAGEE RD")
+        page.locator("#Mortgagee1_City").fill("FAIRFIELD")
+        page.locator("#Mortgagee1_State").select_option("CA")
+        page.locator("#Mortgagee1_ZipCode").fill("94534")
+    else:
+        raise ValueError(f"Unknown applicant choice: {applicant_choice_option}")
 
     payment_type = page.get_by_text("Full Pay$")
     payment_type.click()
