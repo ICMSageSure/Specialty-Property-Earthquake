@@ -55,7 +55,9 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
 
     page.locator("#PropertyAddressSingleLine").wait_for(state="visible")
     page.locator("#PropertyAddressSingleLine").click()
-    page.locator("#PropertyAddressSingleLine").fill(random.choice(address_list))
+    page.locator("#PropertyAddressSingleLine").fill("36 PELICAN CREST DR, NEWPORT COAST, CA 92657-1805")
+    page.wait_for_timeout(1000)
+    # page.locator("#PropertyAddressSingleLine").press("ArrowDown")
     screenshot_path3 = "screenshot_address.png"
     page.screenshot(path=screenshot_path3, full_page=True)
     page.wait_for_timeout(1000)
@@ -63,7 +65,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_role("combobox", name="See the best options for").press("Enter")
     page.get_by_role("button", name="Start Quote").click()
     page.get_by_role("textbox", name="Current Companion Insurance Policy Coverage A Dwelling Limit").click()
-    page.get_by_role("textbox", name="Current Companion Insurance Policy Coverage A Dwelling Limit").fill("3,600,000")
+    page.get_by_role("textbox", name="Current Companion Insurance Policy Coverage A Dwelling Limit").fill("4,600,000")
     page.get_by_role("textbox", name="Primary Applicant First Name").click()
     page.get_by_role("textbox", name="Primary Applicant First Name").press("CapsLock")
     page.get_by_role("textbox", name="Primary Applicant First Name").fill("ICMTEST")
@@ -80,10 +82,20 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.get_by_role("button", name="Agree & Continue").click()
     page.locator("#lnkExpandAll").click()
     page.get_by_role("button", name="Continue Shopping Cart", exact=True).wait_for(state="visible")
-    page.get_by_text("10%", exact=True).click()
+    continue_btns = page.get_by_role("button", name="Continue")
+
+
+    # page.get_by_text("10%", exact=True).click()
+    page.locator("#rdoFullDeductibleList_SLEQFL").get_by_text("20%").click()
+    
     screenshot_path5 = "screenshot_quote_options.png"
     page.screenshot(path=screenshot_path5, full_page=True)
-    page.get_by_role("button", name="Continue Shopping Cart", exact=True).click()
+    if continue_btns.count() > 1:
+    # If more than one, click the second button
+        continue_btns.nth(1).click()
+    else:
+    # Otherwise, click the only button
+        continue_btns.first.click()
 
     screenshot_path6 = "screenshot_ues.png"
     page.screenshot(path=screenshot_path6, full_page=True)
@@ -95,7 +107,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
 
     page.locator(".radio-toolbar")
 # Set this variable to one of: 'Applicant', 'Alternate Payor', 'Mortgagee'
-    applicant_choice_option = "Alternate Payor"  # or "Applicant" or "Mortgagee"
+    applicant_choice_option = "Alternate Payor" #"Alternate Payor" or "Applicant" or "Mortgagee"
 
     if applicant_choice_option == "Applicant":
         page.get_by_text("Applicant", exact=True).click()
@@ -127,7 +139,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     else:
         raise ValueError(f"Unknown applicant choice: {applicant_choice_option}")
 
-    payment_type = page.get_by_text("Full Pay$")
+    payment_type = page.get_by_text("Three Pay$")
     payment_type.click()
     print(f"\nSelected Payment Type: {payment_type.inner_text()}")
     auto_pay_onoff = page.get_by_text("Auto Pay On")
@@ -156,7 +168,8 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     screenshot_path8 = "screenshot_quotation_enrollment.png"
     page.screenshot(path=screenshot_path8, full_page=True)
     page.get_by_role("button", name="Continue").click()
-    # page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("link", name="Add new payment method").wait_for(state="visible")
+    page.get_by_text("Mail Form Later").click()
+    page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("link", name="Add new payment method").wait_for(state="visible")
     # page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("link", name="Add new payment method").click()
     # page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter card number").wait_for(state="visible")
     # page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("textbox", name="Please, enter card number").click()
