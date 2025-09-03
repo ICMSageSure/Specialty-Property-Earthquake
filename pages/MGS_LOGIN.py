@@ -1,10 +1,11 @@
 import os
 from dotenv import load_dotenv
+load_dotenv()
+
 
 class Login:
     def __init__(self, page):
         self.page = page
-        load_dotenv()
         self.username = os.getenv("USERNAME")
         self.password = os.getenv("PASSWORD")
         self.url = os.getenv("BASE_URL")

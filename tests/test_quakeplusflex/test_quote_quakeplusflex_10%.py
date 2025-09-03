@@ -35,11 +35,23 @@ test_credit_card_numbers = ["4111111111111111",
 
 ]
 
-@pytest.fixture(scope="session")
-def browser_context_args(browser_context_args, playwright):
-    return {"viewport": {"width":1920,"height":1080}}
+
 
 def test_quote_quakeplusflex_5percent(page: Page) -> None:
+    applicant_type = os.getenv("APPLICANT_TYPE", "LLC")
+
+    # Payment Plan: Full Pay, Three Pay, Monthly Pay
+    payment_plan = os.getenv("PAYMENT_PLAN", "Three Pay$")
+
+    # Auto Payment: Auto Pay On, Auto Pay Off
+    auto_payment = os.getenv("AUTO_PAYMENT", "Auto Pay On")
+
+    # QuakePlus+ Flex Deductible Percent options: 10%, 15%, 20%, 25%
+    # deductible_percent = os.getenv("DEDUCTIBLE_PERCENT", "10%")
+
+    # Applicant Choice: Applicant, Alternate Payor, Mortgagee
+    applicant_choice = os.getenv("APPLICANT_CHOICE", "Applicant")
+
     page.goto("https://tst.mygeosource.com/")
     page.get_by_role("textbox", name="Policyholder Email or Agent").fill("BRK99102")
     page.get_by_role("textbox", name="Password").fill("Password1")
@@ -80,13 +92,16 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
 
     page.get_by_role("button", name="View Quote Options").click()
     page.get_by_role("button", name="Agree & Continue").click()
-    page.locator("#lnkExpandAll").click()
+    # page.locator("#lnkExpandAll").click()
     page.get_by_role("button", name="Continue Shopping Cart", exact=True).wait_for(state="visible")
     continue_btns = page.get_by_role("button", name="Continue")
+    page.locator("label[for=rdoFullDeductibleList_SLEQFL0]").wait_for(state="visible")
+    # QuakePlus+ Flex Deductible Percent options: SLEQFL0 = 10%, 
+    #                                             SLEQFL1 = 15%, 
+    #                                             SLEQFL2 = 20%, 
+    #                                             SLEQFL3 = 25%
 
-
-    # page.get_by_text("10%", exact=True).click()
-    page.locator("#rdoFullDeductibleList_SLEQFL").get_by_text("20%").click()
+    page.locator("label[for=rdoFullDeductibleList_SLEQFL0]").click()
     
     screenshot_path5 = "screenshot_quote_options.png"
     page.screenshot(path=screenshot_path5, full_page=True)
@@ -107,8 +122,8 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
 
     page.locator(".radio-toolbar")
 # Set this variable to one of: 'Applicant', 'Alternate Payor', 'Mortgagee'
-    applicant_choice_option = "Alternate Payor" #"Alternate Payor" or "Applicant" or "Mortgagee"
-
+    applicant_choice_option = applicant_choice
+    print(f"\nSelected Applicant Choice: {applicant_choice_option}\n")
     if applicant_choice_option == "Applicant":
         page.get_by_text("Applicant", exact=True).click()
         # Fill in applicant information
@@ -139,10 +154,10 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     else:
         raise ValueError(f"Unknown applicant choice: {applicant_choice_option}")
 
-    payment_type = page.get_by_text("Three Pay$")
+    payment_type = page.get_by_text(payment_plan)
     payment_type.click()
     print(f"\nSelected Payment Type: {payment_type.inner_text()}")
-    auto_pay_onoff = page.get_by_text("Auto Pay On")
+    auto_pay_onoff = page.get_by_text(auto_payment, exact=True)
     auto_pay_onoff.click()
     print(f"Selected Auto Pay: {auto_pay_onoff.inner_text()}")
     page.set_input_files("#fileD1",

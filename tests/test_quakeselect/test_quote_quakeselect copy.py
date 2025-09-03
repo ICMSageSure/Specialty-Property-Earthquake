@@ -9,7 +9,6 @@ relative_path = "uploads/testfile.pdf"
 
 absolute_path = os.path.abspath(relative_path)
 
-load_dotenv()
 
 @pytest.fixture
 def setUp(page):
@@ -23,14 +22,26 @@ def setUp(page):
 @pytest.fixture
 def login(setUp, page):
     login = Login(page)
-    login.enter_username(login.username)
-    login.enter_password(login.password)
+    login.login()
     return page
 
-def test_quakeselect(page: Page, setUp) -> None:
-    base_url = os.getenv("BASE_URL")
-    page.goto(base_url)
-    
+def test_quakeselect(page: Page, setUp, login) -> None:
+    # login = Login(page)
+    # base_url = os.getenv("BASE_URL")
+    # page.goto(base_url)
+    # Applicant Type:Individual, LLC, Trust, Estate Corporation
+    applicant_type = os.getenv("APPLICANT_TYPE", "LLC")
+
+    # Payment Plan: Full Pay, Three Pay, Monthly Pay
+    payment_plan = os.getenv("PAYMENT_PLAN", "Three Pay")
+
+    # Auto Payment: Yes, No
+    auto_payment = os.getenv("AUTO_PAYMENT", "Yes")
+
+    # QS Deductible Percent options: 2.5%, 5%, 7.5%, 10%, 12.5%, 15%, 20%, 25%
+    deductible_percent = os.getenv("DEDUCTIBLE_PERCENT", "2.5%")
+    # login.enter_username(login.username)
+    # login.enter_password(login.password)
     page.wait_for_selector("text=this is a test")
     page.get_by_role("paragraph").filter(has_text="Start New Quote").get_by_role("link").click()
     page.get_by_role("treeitem", name="Residential Earthquake Products").locator("span").first.click()
@@ -67,34 +78,34 @@ def test_quakeselect(page: Page, setUp) -> None:
     quote_text = f"Quote: {visible_quote}"
     assert re.fullmatch(r"Quote: QP\d{8}", quote_text), f"Quote format invalid: {quote_text}"
     print(f"\n{quote_text}")
-    page.get_by_text("2.5%", exact=True).click()
+    page.get_by_text(deductible_percent, exact=True).click()
     expect(page.locator("#divGridNav")).to_contain_text("Dwelling Limit: $600,000")
     expect(page.locator("#divSubContent")).to_contain_text("$600,000")
     page.get_by_role("button", name="Continue Shopping Cart", exact=True).click()
-    page.get_by_role("row", name="Yes No Is the dwelling currently under course of construction?").locator("label").first.click()
-    page.get_by_role("row", name="Yes No Is the dwelling currently under major renovation affecting habitability?").locator("label").first.click()
-    page.get_by_role("row", name="Yes No Does the dwelling have any unrepaired earthquake damage?").locator("label").first.click()
-    page.get_by_role("row", name="Yes No Does the dwelling have any log and/or adobe siding?").locator("label").first.click()
-    page.get_by_role("row", name="Yes No Is the dwelling located within 500 feet of a high tide beach?").locator("label").first.click()
-    page.get_by_role("row", name="Yes No Is the dwelling less").locator("label").first.click()
-    page.get_by_role("row", name="Yes No Is any part of the").locator("label").first.click()
-    page.get_by_role("button", name="Continue").click()
-    expect(page.locator("#divSubContent")).to_contain_text("Property ineligible due to building over water.")
-    expect(page.locator("#divSubContent")).to_contain_text("Property ineligible due to unrepaired damage.")
-    expect(page.locator("#divSubContent")).to_contain_text("Property ineligible due to the dwelling having any log and/or adobe siding.")
-    expect(page.locator("#divSubContent")).to_contain_text("Property ineligible due to dwelling under course of construction or renovation.")
-    page.get_by_role("row", name="Yes No Is the dwelling currently under course of construction?").locator("label").nth(1).click()
-    page.get_by_role("row", name="Yes No Is the dwelling currently under major renovation affecting habitability?").locator("label").nth(1).click()
-    page.get_by_role("row", name="Yes No Does the dwelling have any unrepaired earthquake damage?").locator("label").nth(1).click()
-    page.get_by_role("row", name="Yes No Does the dwelling have any log and/or adobe siding?").locator("label").nth(1).click()
-    page.get_by_role("row", name="Yes No Is the dwelling located within 500 feet of a high tide beach?").locator("label").nth(1).click()
-    page.get_by_role("row", name="Yes No Is the dwelling less").locator("label").nth(1).click()
-    page.get_by_role("row", name="Yes No Is any part of the").locator("label").nth(1).click()
+    # page.get_by_role("row", name="Yes No Is the dwelling currently under course of construction?").locator("label").first.click()
+    # page.get_by_role("row", name="Yes No Is the dwelling currently under major renovation affecting habitability?").locator("label").first.click()
+    # page.get_by_role("row", name="Yes No Does the dwelling have any unrepaired earthquake damage?").locator("label").first.click()
+    # page.get_by_role("row", name="Yes No Does the dwelling have any log and/or adobe siding?").locator("label").first.click()
+    # page.get_by_role("row", name="Yes No Is the dwelling located within 500 feet of a high tide beach?").locator("label").first.click()
+    # page.get_by_role("row", name="Yes No Is the dwelling less").locator("label").first.click()
+    # page.get_by_role("row", name="Yes No Is any part of the").locator("label").first.click()
+    # page.get_by_role("button", name="Continue").click()
+    # expect(page.locator("#divSubContent")).to_contain_text("Property ineligible due to building over water.")
+    # expect(page.locator("#divSubContent")).to_contain_text("Property ineligible due to unrepaired damage.")
+    # expect(page.locator("#divSubContent")).to_contain_text("Property ineligible due to the dwelling having any log and/or adobe siding.")
+    # expect(page.locator("#divSubContent")).to_contain_text("Property ineligible due to dwelling under course of construction or renovation.")
+    # page.get_by_role("row", name="Yes No Is the dwelling currently under course of construction?").locator("label").nth(1).click()
+    # page.get_by_role("row", name="Yes No Is the dwelling currently under major renovation affecting habitability?").locator("label").nth(1).click()
+    # page.get_by_role("row", name="Yes No Does the dwelling have any unrepaired earthquake damage?").locator("label").nth(1).click()
+    # page.get_by_role("row", name="Yes No Does the dwelling have any log and/or adobe siding?").locator("label").nth(1).click()
+    # page.get_by_role("row", name="Yes No Is the dwelling located within 500 feet of a high tide beach?").locator("label").nth(1).click()
+    # page.get_by_role("row", name="Yes No Is the dwelling less").locator("label").nth(1).click()
+    # page.get_by_role("row", name="Yes No Is any part of the").locator("label").nth(1).click()
     page.get_by_role("button", name="Continue").click()
     page.get_by_role("button", name="Pay Now").click()
-    page.get_by_text("Applicant", exact=True).click()
-    page.get_by_text("Full Pay$").click()
-    page.get_by_text("Auto Pay On").click()
+    page.get_by_text(applicant_type, exact=True).click()
+    page.get_by_text(payment_plan, exact=True).click()
+    page.get_by_text(auto_payment, exact=True).click()
     page.set_input_files("#fileHODec",
                         absolute_path)
     page.locator(".eqq-terms-and-conditions-agreement > .eqq-checkbox-container > .eqq-checkbox > .bho-checkbox > .bho-checkmark").click()

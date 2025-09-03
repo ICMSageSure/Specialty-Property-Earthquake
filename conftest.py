@@ -1,5 +1,9 @@
 import pytest
 from playwright.sync_api import Page, expect
+from pages.MGS_LOGIN import Login
+import dotenv 
+
+dotenv.load_dotenv()
 
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args, playwright):
