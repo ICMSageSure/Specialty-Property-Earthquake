@@ -50,7 +50,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     # deductible_percent = os.getenv("DEDUCTIBLE_PERCENT", "10%")
 
     # Applicant Choice: Applicant, Alternate Payor, Mortgagee
-    applicant_choice = os.getenv("APPLICANT_CHOICE", "Applicant")
+    bill_to = os.getenv("BILL_TO", "Alternate Payor")
 
     page.goto("https://tst.mygeosource.com/")
     page.get_by_role("textbox", name="Policyholder Email or Agent").fill("BRK99102")
@@ -120,18 +120,61 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.screenshot(path=screenshot_path7, full_page=True)
     page.get_by_role("button", name="Pay Now").click()
 
-    page.locator(".radio-toolbar")
-# Set this variable to one of: 'Applicant', 'Alternate Payor', 'Mortgagee'
-    applicant_choice_option = applicant_choice
-    print(f"\nSelected Applicant Choice: {applicant_choice_option}\n")
-    if applicant_choice_option == "Applicant":
+
+    
+    toolbars = page.locator(".radio-toolbar")
+
+    # 1st toolbar = applicant type
+    toolbars.nth(0).get_by_text(applicant_type, exact=True).click()
+    print(f"\nSelected Applicant Type: \n{applicant_type}")
+    if applicant_type == "Individual":
         page.get_by_text("Applicant", exact=True).click()
         # Fill in applicant information
         # page.locator("#Applicant_FirstName").fill("ICMTEST")
         # page.locator("#Applicant_LastName").fill("TESTER")
         # page.locator("#Applicant_PhoneNumber").fill("7075551234")
         # page.locator("#ApplicantEmailAddress").fill("ICMGEOTESTER@GMAIL.COM")
-    elif applicant_choice_option == "Alternate Payor":
+    elif applicant_type == "LLC":
+        page.get_by_text("LLC", exact=True).click()
+        # Fill in the alternate payor information
+        page.locator("#Entity").fill("ICMTEST ENTITYLLC")
+        page.locator("#ManagingMember_FirstName").fill("LLC ICMFIRSTNAME")
+        page.locator("#ManagingMember_LastName").fill("ICMLASTNAME")
+    elif applicant_type == "Trust":
+        page.get_by_text("Trust", exact=True).click()
+        # Fill in mortgagee information
+        page.locator("#Entity").fill("ICMTEST ENTITYLLC")
+        page.locator("#ManagingMember_FirstName").fill("LLC ICMFIRSTNAME")
+        page.locator("#ManagingMember_LastName").fill("ICMLASTNAME")
+    elif applicant_type == 'Estate':
+        page.get_by_text("Estate", exact=True).click()
+        # Fill in estate information
+        page.locator("#Entity").fill("ICMTEST ENTITYESTATE")
+        page.locator("#ManagingMember_FirstName").fill("ESTATE ICMFIRSTNAME")
+        page.locator("#ManagingMember_LastName").fill("ICMLASTNAME")
+    elif applicant_type == 'Corporation':
+        page.get_by_text("Corporation", exact=True).click()
+        # Fill in corporation information
+        page.locator("#Entity").fill("ICMTEST ENTITYCORPORATION")
+        page.locator("#ManagingMember_FirstName").fill("CORPORATION ICMFIRSTNAME")
+        page.locator("#ManagingMember_LastName").fill("ICMLASTNAME")
+    else:
+        raise ValueError(f"Unknown bill to choice: {bill_to_choice}")
+
+
+
+    page.locator(".radio-toolbar")
+# Set this variable to one of: 'Applicant', 'Alternate Payor', 'Mortgagee'
+    bill_to_choice = bill_to
+    print(f"\n\nSelected Bill To Choice: \n{bill_to_choice}\n")
+    if bill_to_choice == "Applicant":
+        page.get_by_text("Applicant", exact=True).click()
+        # Fill in applicant information
+        # page.locator("#Applicant_FirstName").fill("ICMTEST")
+        # page.locator("#Applicant_LastName").fill("TESTER")
+        # page.locator("#Applicant_PhoneNumber").fill("7075551234")
+        # page.locator("#ApplicantEmailAddress").fill("ICMGEOTESTER@GMAIL.COM")
+    elif bill_to_choice == "Alternate Payor":
         page.get_by_text("Alternate Payor", exact=True).click()
         # Fill in the alternate payor information
         page.locator("#AlternatePayor_Addressee1").fill("ICMTEST ALTPAYOR")
@@ -140,7 +183,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
         page.locator("#AlternatePayor_State").select_option("CA")
         page.locator("#AlternatePayor_ZipCode").fill("94534")
         page.locator("#AlternatePayorLoanNumber").fill("11223344")
-    elif applicant_choice_option == "Mortgagee":
+    elif bill_to_choice == "Mortgagee":
         page.get_by_text("Mortgagee", exact=True).click()
         # Fill in mortgagee information
         page.locator('#btn-edit-mortgagee').click()
@@ -152,14 +195,14 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
         page.locator("#Mortgagee1_State").select_option("CA")
         page.locator("#Mortgagee1_ZipCode").fill("94534")
     else:
-        raise ValueError(f"Unknown applicant choice: {applicant_choice_option}")
+        raise ValueError(f"Unknown bill to choice: {bill_to_choice}")
 
     payment_type = page.get_by_text(payment_plan)
     payment_type.click()
-    print(f"\nSelected Payment Type: {payment_type.inner_text()}")
+    print(f"Selected Payment Type: \n{payment_type.inner_text()}\n")
     auto_pay_onoff = page.get_by_text(auto_payment, exact=True)
     auto_pay_onoff.click()
-    print(f"Selected Auto Pay: {auto_pay_onoff.inner_text()}")
+    print(f"Selected Auto Pay: \n{auto_pay_onoff.inner_text()}\n")
     page.set_input_files("#fileD1",
                     absolute_path1)
     page.set_input_files("#fileSL2",
@@ -169,7 +212,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.locator(".eqq-terms-and-conditions-agreement > .eqq-checkbox-container > .eqq-checkbox > .bho-checkbox > .bho-checkmark").click()
     td_text = page.locator('table.eqq-summary td').first.text_content()
     match = re.fullmatch(r"UU\d{8}", td_text.strip())
-    print(f"Quote Number:\n {td_text.strip()}")
+    print(f"Quote Number:\n{td_text.strip()}\n")
     payment_toolbar = page.locator('.radio-toolbar').filter(has_text="Full Pay")
     radio_items = payment_toolbar.locator('.radio-item')
     for i in range(radio_items.count()):
@@ -177,7 +220,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
         if len(label_text) == 2:
             plan, amount = label_text
             if plan.strip() in ["Full Pay", "Three Pay", "Monthly Pay"]:
-                print(f"{plan.strip()}: {amount.strip()}")
+                print(f"{plan.strip()}: \n{amount.strip()}")
         else:
             print(f"Unknown format: {label_text}")
     screenshot_path8 = "screenshot_quotation_enrollment.png"
