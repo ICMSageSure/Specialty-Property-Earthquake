@@ -116,9 +116,9 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
     page.screenshot(path=screenshot_path6, full_page=True)
     page.get_by_role("button", name="Continue").click()
 
-    screenshot_path7 = "screenshot_paynow.png"
+    screenshot_path7 = "screenshot_finalize_application.png"
     page.screenshot(path=screenshot_path7, full_page=True)
-    page.get_by_role("button", name="Pay Now").click()
+    page.get_by_role("button", name="Finalize Application").click()
 
 
     
@@ -225,7 +225,7 @@ def test_quote_quakeplusflex_5percent(page: Page) -> None:
             print(f"Unknown format: {label_text}")
     screenshot_path8 = "screenshot_quotation_enrollment.png"
     page.screenshot(path=screenshot_path8, full_page=True)
-    page.get_by_role("button", name="Continue").click()
+    page.get_by_role("button", name="Pay Now").click()
     page.get_by_text("Mail Form Later").click()
     page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("link", name="Add new payment method").wait_for(state="visible")
     # page.get_by_role("dialog", name="Payment method").content_frame.get_by_role("link", name="Add new payment method").click()
