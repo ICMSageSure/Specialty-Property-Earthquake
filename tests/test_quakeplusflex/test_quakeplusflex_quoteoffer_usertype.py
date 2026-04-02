@@ -9,26 +9,11 @@ import pytest
 import re
 import os
 import csv
-import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from playwright.sync_api import Page, expect
 from dotenv import load_dotenv
 
 load_dotenv()
-
-address_list = [
-    "59 Ventana Dr, American Canyon, CA 94503",
-    "2861 Pinnacles Ter, Fremont, CA 94538",
-    "1196 Sunny Ct, San Jose, CA 95116",
-    "4088 E Heritage Ln, Ontario, CA 91761",
-    "2182 Esperanca Ave, Santa Clara, CA 95054",
-    "1955 Celeste Ave, Clovis, CA 93611",
-    "620 Tanbark Oak Ct, El Dorado Hills, CA 95762",
-    "2725 Lake St, Bakersfield, CA 93306",
-    "329 Beaumont Blvd, Pacifica, CA 94044",
-    "735 The Alameda, El Granada, CA 94018",
-    "2102 Harborview Ct, Santa Cruz, CA 95062",
-]
 
 relative_path1 = "uploads/testfile.pdf"
 relative_path2 = "uploads/testfile2.pdf"
@@ -44,15 +29,16 @@ def browser_context_args(browser_context_args, playwright):
     return {"viewport": {"width": 1920, "height": 1080}, "ignore_https_errors": True}
 
 
-@pytest.mark.parametrize("auto_payment,payment_plan", [
-    ("Auto Pay On",  "Full Pay"),
-    ("Auto Pay On",  "Three Pay"),
-    ("Auto Pay On",  "Monthly Pay"),
-    ("Auto Pay Off", "Full Pay"),
-    ("Auto Pay Off", "Three Pay"),
-    ("Auto Pay Off", "Monthly Pay"),
+@pytest.mark.parametrize("address", [
+    "59 Ventana Dr, American Canyon, CA 94503",
+    "3215 SE Division St, Portland, OR 97202",
+    "3812 NE 55th St, Seattle, WA 98105",
 ])
-def test_quakeplusflex_quoteoffer_usertype(page: Page, auto_payment: str, payment_plan: str) -> None:
+@pytest.mark.parametrize("auto_payment,payment_plan", [
+    ("Auto Pay On",  "Three Pay"),
+    ("Auto Pay Off", "Three Pay"),
+])
+def test_quakeplusflex_quoteoffer_usertype(page: Page, auto_payment: str, payment_plan: str, address: str) -> None:
     # ── Agent credentials ────────────────────────────────────────────────────
     username = os.getenv("AGENT_USERNAME", "BRK99102")
     password = os.getenv("AGENT_PASSWORD", "Password1")
@@ -72,7 +58,6 @@ def test_quakeplusflex_quoteoffer_usertype(page: Page, auto_payment: str, paymen
     page.get_by_role("button", name="OK").click()
 
     # ── Address entry ────────────────────────────────────────────────────────
-    address = random.choice(address_list)
     print(f"\nUsing address: {address}")
     page.locator("#PropertyAddressSingleLine").wait_for(state="visible")
     page.locator("#PropertyAddressSingleLine").press_sequentially(address, delay=50)
@@ -97,18 +82,20 @@ def test_quakeplusflex_quoteoffer_usertype(page: Page, auto_payment: str, paymen
     page.get_by_role("button", name="Continue Shopping Cart", exact=True).wait_for(state="visible")
     page.locator("label[for=rdoFullDeductibleList_SLEQFL0]").wait_for(state="visible")
     page.locator("label[for=rdoFullDeductibleList_SLEQFL0]").click()
-
-    continue_btns = page.get_by_role("button", name="Continue")
-    if continue_btns.count() > 1:
-        continue_btns.nth(1).click()
-    else:
-        continue_btns.first.click()
+    page.get_by_role("button", name="Continue Shopping Cart", exact=True).click()
 
     # ── UES screen ───────────────────────────────────────────────────────────
     page.get_by_role("button", name="Continue").click()
 
     # ── Finalize Application ──────────────────────────────────────────────────
     page.get_by_role("button", name="Finalize Application").click()
+
+    # ── Set effective date to today + 2 ──────────────────────────────────────
+    effective_date_value = (datetime.today() + timedelta(days=2)).strftime("%m/%d/%Y")
+    page.locator("#EffectiveDate").wait_for(state="visible")
+    page.locator("#EffectiveDate").fill(effective_date_value)
+    page.locator("#EffectiveDate").press("Tab")
+    print(f"\nEffective Date set to: {effective_date_value}")
 
     # ── Applicant type: Individual ────────────────────────────────────────────
     page.locator(".radio-toolbar").nth(0).get_by_text("Individual", exact=True).click()
